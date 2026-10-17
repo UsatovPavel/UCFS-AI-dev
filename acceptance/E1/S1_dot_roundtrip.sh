@@ -5,6 +5,7 @@
 source "$(dirname "$0")/lib.sh"
 
 RES=solver/build/test-results/test
+CLS=acceptance.E1DotWriterRoundTripTest
 
 if grep -nE '@Disabled|@Ignore' solver/src/test/kotlin/TestDotParser.kt; then
     fail "TestDotParser.kt contains @Disabled/@Ignore"
@@ -12,17 +13,22 @@ else
     pass "TestDotParser.kt is not disabled"
 fi
 
+# Old XML must not count: drop it, then require Gradle itself to succeed.
+rm -rf "$RES"
 gradle :solver:test --rerun --continue \
-    --tests 'TestDotParser' --tests 'acceptance.E1DotWriterRoundTripTest' \
+    --tests 'TestDotParser' --tests "$CLS" \
     > build-acceptance-S1.log 2>&1
-echo "gradle exit code: $? (log: build-acceptance-S1.log)"
+rc=$?
+echo "gradle exit code: $rc (log: build-acceptance-S1.log)"
 tail -n 15 build-acceptance-S1.log
+[ $rc -eq 0 ] && pass "gradle :solver:test" || fail "gradle :solver:test exit $rc"
 
 st=$(junit_case_status "$RES" TestDotParser testParser)
 [ "$st" = PASSED ] && pass "TestDotParser.testParser: $st" || fail "TestDotParser.testParser: $st"
 
-for t in labelValuesAreQuoted bracketLabelsSurviveRoundTrip pointsToStyleLabelsSurviveRoundTrip quoteInsideLabelSurvivesRoundTrip; do
-    st=$(junit_case_status "$RES" acceptance.E1DotWriterRoundTripTest "$t")
+for t in labelValuesAreQuoted bracketLabelsSurviveRoundTrip pointsToStyleLabelsSurviveRoundTrip \
+         quoteInsideLabelSurvivesRoundTrip backslashInsideLabelSurvivesRoundTrip; do
+    st=$(junit_case_status "$RES" "$CLS" "$t")
     [ "$st" = PASSED ] && pass "E1DotWriterRoundTripTest.$t: $st" || fail "E1DotWriterRoundTripTest.$t: $st"
 done
 

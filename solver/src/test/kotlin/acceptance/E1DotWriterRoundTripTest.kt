@@ -75,4 +75,17 @@ class E1DotWriterRoundTripTest {
         val parsed = roundTrip(graph)
         assertEquals(edgeSet(graph), edgeSet(parsed))
     }
+
+    @Test
+    fun backslashInsideLabelSurvivesRoundTrip() {
+        // Escaping must be symmetric: a backslash before a quote, a single and a double
+        // backslash inside a label all come back unchanged. A label that ENDS with a backslash
+        // is not covered: Dot.g4 reads `\"` as an escaped quote, so it cannot be written.
+        val graph = graphOf(
+            setOf(0),
+            listOf(Triple(0, "x\\\"y", 1), Triple(1, "a\\b", 2), Triple(2, "p\\\\q", 0))
+        )
+        val parsed = roundTrip(graph)
+        assertEquals(edgeSet(graph), edgeSet(parsed))
+    }
 }
