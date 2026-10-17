@@ -20,8 +20,32 @@ class GraphFromDotVisitor : DotBaseVisitor<InputGraph<Int, TerminalInputLabel>>(
     }
 
     private fun parseSimpleEdge(edgeView: String): TerminalInputLabel {
-        val viewWithoutQuotes = edgeView.substring(1, edgeView.length - 1)
-        return TerminalInputLabel(Term(viewWithoutQuotes))
+        return TerminalInputLabel(Term(unquote(edgeView)))
+    }
+
+    /**
+     * Reverses DotWriter quoting: drops the surrounding quotes, then reads left to right,
+     * turning `\\` into `\` and `\"` into `"`. Other characters stay as they are.
+     * Unquoted values (plain DOT IDs or numbers) are returned unchanged.
+     */
+    private fun unquote(view: String): String {
+        if (view.length < 2 || !view.startsWith("\"") || !view.endsWith("\"")) {
+            return view
+        }
+        val body = view.substring(1, view.length - 1)
+        val result = StringBuilder(body.length)
+        var i = 0
+        while (i < body.length) {
+            val c = body[i]
+            if (c == '\\' && i + 1 < body.length && (body[i + 1] == '\\' || body[i + 1] == '"')) {
+                result.append(body[i + 1])
+                i += 2
+            } else {
+                result.append(c)
+                i++
+            }
+        }
+        return result.toString()
     }
 
     override fun visitEdge_stmt(ctx: DotParser.Edge_stmtContext?): InputGraph<Int, TerminalInputLabel> {
