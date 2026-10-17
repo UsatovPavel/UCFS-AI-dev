@@ -111,6 +111,8 @@ compile_variant() { # variant kotlin-version use-published
     else outcome=GRADLE_ERROR
     fi
     echo "$v: $outcome" | tee -a "$OUT/summary.txt"
+    echo "$v e: main=$(grep -cE '^e: file://[^ ]*/src/main/' "$log") test=$(grep -cE '^e: file://[^ ]*/src/test/' "$log")" \
+        | tee -a "$OUT/summary.txt"
 }
 
 compile_variant V0 1.9.20 0

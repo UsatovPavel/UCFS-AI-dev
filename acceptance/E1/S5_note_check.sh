@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # E1-S5 check of the report against the evidence of S5_api_evidence.sh (run that first).
 # The note must: name the measured artifact (UCFS-Commit) and cfl-idr commit; quote the outcome
-# of every compile variant verbatim ("V1: COMPILER_ERRORS(20)"); have a row for EVERY symbol
+# of every compile variant verbatim ("V1: COMPILER_ERRORS(20)", "V1 e: main=20 test=0"); have a row for EVERY symbol
 # that V2 reports as unresolved; label conclusions "проверено"/"интерпретация"; and end with a
 # recommendation for E6. It does not judge whether the analysis is right: that is the verifier's job.
 # Usage: bash acceptance/E1/S5_note_check.sh <note.md>     (exit 0 = PASS)
@@ -19,7 +19,7 @@ for key in "published UCFS-Commit" "cfl-idr"; do
 done
 while read -r line; do
     grep -qF "$line" "$NOTE" && pass "note quotes '$line'" || fail "note does not quote '$line'"
-done < <(grep -E '^V[0-9]: ' "$EV/summary.txt")
+done < <(grep -E '^V[0-9]:? ' "$EV/summary.txt" | grep -E '^V[0-9](:| e:) ')
 missing=""
 while read -r sym; do
     [ -z "$sym" ] && continue
