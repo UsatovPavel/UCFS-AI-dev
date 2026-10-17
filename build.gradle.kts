@@ -75,7 +75,49 @@ tasks.jacocoTestCoverageVerification {
 
 group = "org.ucfs"
 
-version = scmVersion.version
+// The version comes from `ucfsVersion` in gradle.properties, so it does not depend on which git
+// tags are present in the clone. Pass `-PucfsVersion=` (empty) to fall back to the axion-release
+// version computed from tags (the upstream release flow).
+version = providers.gradleProperty("ucfsVersion")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .orElse(provider { scmVersion.version })
+    .get()
+
+// Git state recorded in every jar manifest: the commit and whether tracked files were modified
+// (untracked files such as generated sources do not count).
+fun gitOutput(vararg args: String): String? = try {
+    val result = providers.exec {
+        commandLine("git", *args)
+        isIgnoreExitValue = true
+    }
+    if (result.result.get().exitValue == 0) result.standardOutput.asText.get().trim() else null
+} catch (e: Exception) {
+    null
+}
+
+val ucfsCommit: String = gitOutput("rev-parse", "HEAD") ?: "unknown"
+val ucfsDirty: String = gitOutput("status", "--porcelain", "--untracked-files=no")
+    ?.let { it.isNotEmpty().toString() } ?: "unknown"
+
+// Published modules are declared in the root project (see `publishing` below), so subprojects
+// need the same coordinates; otherwise `project(":solver")` ends up in the generator POM as
+// `ucfs:solver:unspecified`.
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
+
+    tasks.withType<Jar>().configureEach {
+        manifest {
+            attributes(
+                "Implementation-Title" to project.name,
+                "Implementation-Version" to project.version.toString(),
+                "UCFS-Commit" to ucfsCommit,
+                "UCFS-Dirty" to ucfsDirty,
+            )
+        }
+    }
+}
 
 evaluationDependsOnChildren()
 
