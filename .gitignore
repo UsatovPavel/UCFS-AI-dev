@@ -11,6 +11,7 @@ bin/
 ### IntelliJ IDEA ###
 .idea
 ./test-shared/gen
+/test-shared/gen/
 ### VS Code ###
 .vscode/
 
