@@ -22,11 +22,19 @@ class DotWriter {
             for (edge in edges) {
                 val to = edge.targetVertex
                 val label = edge.label.terminal.toString()
-                builder.append("    $from $connector $to [label = $label];\n")
+                builder.append("    $from $connector $to [label = ${quote(label)}];\n")
             }
         }
 
         builder.append("}")
         return builder.toString()
     }
+
+    /**
+     * Writes a label as a DOT string: `\` becomes `\\` and `"` becomes `\"`.
+     * GraphFromDotVisitor reverses this. A label ending with `\` can't be written:
+     * Dot.g4 reads the closing `\"` as an escaped quote.
+     */
+    private fun quote(label: String): String =
+        "\"" + label.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 }
