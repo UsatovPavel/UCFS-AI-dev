@@ -41,6 +41,26 @@ test-shared/  # Testcases, grammars, inputs, ANTLR4 comparison
 3) **Run query**.  
 4) **Inspect results**.
 
+### Local publishing
+Publish the `solver` and `generator` jars (with POMs) to the local Maven repository, without any
+tokens. Gradle itself must run on JDK 21 (`JAVA_HOME`), and a JDK 11 must also be installed locally
+because the modules are compiled with a JDK 11 toolchain (it is not downloaded automatically):
+```shell
+JAVA_HOME=/path/to/jdk-21 ./gradlew publishToMavenLocal
+# or into a separate repository instead of ~/.m2:
+JAVA_HOME=/path/to/jdk-21 ./gradlew publishToMavenLocal -Dmaven.repo.local=/path/to/repo
+```
+Coordinates (the version is set by `ucfsVersion` in `gradle.properties`, not by git tags):
+- `org.ucfs:solver:0.1.0-ai-SNAPSHOT`
+- `org.ucfs:generator:0.1.0-ai-SNAPSHOT`
+
+Every jar manifest records the commit it was built from (`UCFS-Commit`) and whether tracked files
+had uncommitted changes (`UCFS-Dirty: true|false`):
+```shell
+unzip -p ~/.m2/repository/org/ucfs/solver/0.1.0-ai-SNAPSHOT/solver-0.1.0-ai-SNAPSHOT.jar META-INF/MANIFEST.MF
+```
+To get the version from git tags (axion-release) instead, pass `-PucfsVersion=`.
+
 
 ## Core Algorithm
 UCFS is based on Generalized LL (GLL) parsing algorithm modified to handle language specification in form of Recursive State Machines (RSM) and input in form of arbitratry directed edge-labelled graph. Basic ideas described [here](https://arxiv.org/pdf/2312.11925.pdf). 
