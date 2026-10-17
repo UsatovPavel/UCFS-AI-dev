@@ -77,7 +77,7 @@ for line in open(deps_log, encoding="utf-8", errors="replace"):
     if not m or m.group(1).endswith("(c)"):
         continue
     item = m.group(1)
-    pm = re.match(r"project :([\w.-]+)", item)
+    pm = re.match(r"project '?:([\w.-]+)'?", item)   # Gradle 8: project :x, Gradle 9: project ':x'
     if pm:
         declared.add(f"org.ucfs:{pm.group(1)}")
     else:
