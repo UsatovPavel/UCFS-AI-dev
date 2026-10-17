@@ -2,6 +2,8 @@
 *.log
 *.logs
 
+bin/
+
 .gradle
 !gradle/wrapper/gradle-wrapper.jar
 **/build/
@@ -9,6 +11,7 @@
 ### IntelliJ IDEA ###
 .idea
 ./test-shared/gen
+/test-shared/gen/
 ### VS Code ###
 .vscode/
 

@@ -1,5 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm")
+    jacoco
+}
+
+jacoco{
+    toolVersion = "0.8.14"
 }
 
 group = "org.pl"
@@ -38,6 +43,7 @@ tasks.test {
         "-Dwrite_case_time=$write_case_time"
     )
 }
+
 kotlin {
     jvmToolchain(11)
 }

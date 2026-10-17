@@ -1,8 +1,9 @@
 plugins {
     java
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.allopen") version "1.9.20"
+    kotlin("jvm")
+    kotlin("plugin.allopen")
 }
+
 
 repositories {
     mavenCentral()
@@ -25,4 +26,7 @@ dependencies {
 
 kotlin { jvmToolchain(11) }
 
-tasks.test { useJUnitPlatform() }
+tasks.test { 
+    useJUnitPlatform() 
+}
+
